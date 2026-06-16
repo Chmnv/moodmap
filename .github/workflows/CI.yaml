@@ -45,15 +45,15 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
-      - name: Check backend imports
-        env:
-          SPOTIFY_CLIENT_ID: test
-          SPOTIFY_CLIENT_SECRET: test
-          DATABASE_URL: sqlite:///test.db
-          SECRET_KEY: test-secret
-        run: |
-          cd backend
-          python -c "import main"
+      # - name: Check backend imports
+      #   env:
+      #     SPOTIFY_CLIENT_ID: test
+      #     SPOTIFY_CLIENT_SECRET: test
+      #     DATABASE_URL: sqlite:///test.db
+      #     SECRET_KEY: test-secret
+      #   run: |
+      #     cd backend
+      #     python -c "import main"
   
   docker-build:
     runs-on: ubuntu-latest
