@@ -21,7 +21,7 @@ jobs:
       - name: Instal dependencies
         run: |
           cd frontend
-          npm install
+          npm ci
 
       - name: Build frontend
         run: |
@@ -45,10 +45,15 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
-      # - name: Check backend imports
-      #   run: |
-      #     cd backend
-      #     python -c "import main"
+      - name: Check backend imports
+        env:
+          SPOTIFY_CLIENT_ID: test
+          SPOTIFY_CLIENT_SECRET: test
+          DATABASE_URL: sqlite:///test.db
+          SECRET_KEY: test-secret
+        run: |
+          cd backend
+          python -c "import main"
   
   docker-build:
     runs-on: ubuntu-latest
@@ -57,12 +62,29 @@ jobs:
       - frontend-ci
       - backend-ci
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 
+
+      - name: LogIn to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build backend image
-        run: docker build -t moodmap-backend ./backend
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/moodmap-backend:latest ./backend
+
+      - name: Push backend image
+        run: docker push ghcr.io/${{ github.repository_owner }}/moodmap-backend:latest
 
       - name: Build frontend image
-        run: docker build -t moodmap-frontend ./frontend
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/moodmap-frontend:latest ./frontend
+
+      - name: Push frontend image
+        run: docker push ghcr.io/${{ github.repository_owner }}/moodmap-frontend:latest
